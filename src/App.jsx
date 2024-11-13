@@ -1,50 +1,56 @@
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
-import Login from './components/Login'
-import Signup from './components/Signup'
+import { useState, useEffect,createContext } from 'react'
 import Dashboard from './components/Dashboard'
 import Orders from './components/Orders'
-import Menu from './components/Menu'
-import Settings from './components/Settings'
+import Settings from './components/Settings/Settings'
 import Sidebar from './components/Sidebar'
-import  './index.css'
-// import { getAuth, onAuthStateChanged } from 'firebase/auth'
+import './index.css'
+import SignIn from './components/Authentication/SignIn'
+import SignUp from './components/Authentication/SignUp'
+import Otp from './components/Authentication/Otp'
+import AddItem from './components/Menu/AddItem'
+import MenuItems from './components/Menu/MenuItems'
+import ForgotPassword from './components/Authentication/ForgotPassword'
+export const context=createContext()
 
 export default function App() {
-  const [user, setUser] = useState("null")
+  const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [token,setToken]=useState(null)
+
   if (loading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>
   }
 
   return (
+    <context.Provider value={{user, setUser, token, setToken}}>
     <Router>
       <div className="flex h-screen bg-gray-100">
-        {user && <Sidebar/>}
-        <div className="flex-1 overflow-auto">
+        {/* Sidebar */}
+        {user && (
+          <div className="lg:fixed lg:left-0 lg:top-0 lg:w-64 lg:h-full">
+            <Sidebar />
+          </div>
+        )}
+
+        {/* Main Content */}
+        <div className={`flex-1 overflow-auto ${user ? 'lg:ml-64' : ''}`}>
           <Routes>
-            <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <Login />} />
-            <Route path="/signup" element={user ? <Navigate to="/dashboard" /> : <Signup />} />
-            <Route
-              path="/dashboard"
-              element={user ? <Dashboard /> : <Navigate to="/login" />}
-            />
-            <Route
-              path="/orders"
-              element={user ? <Orders /> : <Navigate to="/login" />}
-            />
-            <Route
-              path="/menu"
-              element={user ? <Menu /> : <Navigate to="/login" />}
-            />
-            <Route
-              path="/settings"
-              element={user ? <Settings /> : <Navigate to="/login" />}
-            />
+            <Route path="/signIn" element={user ? <Navigate to="/dashboard" /> : <SignIn />} />
+            <Route path="/signUp" element={user ? <Navigate to="/dashboard" /> : <SignUp />} />
+            <Route path="/otp/:email" element={user ? <Navigate to="/dashboard" /> : <Otp />} />
+            <Route path="/forgot-password/:email" element={user ? <Navigate to="/dashboard" /> : <ForgotPassword />} />
+            <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/signIn" />} />
+            <Route path="/orders" element={user ? <Orders /> : <Navigate to="/signIn" />} />
+            <Route path="/add-items" element={user ? <AddItem /> : <Navigate to="/signIn" />} />
+            <Route path="/menu-items" element={user ? <MenuItems /> : <Navigate to="/signIn" />} />
+            <Route path="/settings" element={user ? <Settings /> : <Navigate to="/signIn" />} />
             <Route path="/" element={<Navigate to="/dashboard" />} />
           </Routes>
         </div>
       </div>
     </Router>
+    </context.Provider>
+    
   )
 }
