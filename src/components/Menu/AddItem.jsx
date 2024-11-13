@@ -39,7 +39,8 @@ const AddItem = () => {
 
     setLoading(true);
     try {
-      const response = await addItem({ itemData: { ...newItem, vendor: user }, token }).unwrap();
+      console.log(newItem)
+      const response = await addItem({itemData:newItem, token }).unwrap();
       console.log(response);
       alert('Item added successfully!');
       setNewItem({ name: '', description: '', price: '', image: '' });

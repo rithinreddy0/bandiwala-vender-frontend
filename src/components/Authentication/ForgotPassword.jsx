@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import OTPInput from 'react-otp-input';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { Eye, EyeOff } from 'lucide-react';
 import { useRequestPasswordResetMutation, useVerifyPasswordResetMutation, usePasswordResetMutation } from '../../App/Services/AuthenticationApi';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
@@ -25,14 +25,10 @@ const ForgotPassword = () => {
   const handleSendOtp = async () => {
     try {
       const res = await requestPasswordReset({ email });
-      if (res.error?.status === 400) {
-        setMessage(res.error?.data?.message || 'Invalid email address.');
-      } else {
-        setMessage(res.data?.message || 'OTP sent successfully.');
-        setOtpSent(true);
-        setResendEnabled(false);
-      }
-    } catch (err) {
+      setMessage(res.data?.message || 'OTP sent successfully.');
+      setOtpSent(true);
+      setResendEnabled(false);
+    } catch {
       setMessage('Server error. Please try again later.');
     }
   };
@@ -40,13 +36,9 @@ const ForgotPassword = () => {
   const handleSubmitOtp = async () => {
     try {
       const res = await verifyPasswordReset({ email, otp: Number(otp) });
-      if (res.error?.status === 400) {
-        setMessage(res.error?.data?.message || 'Invalid OTP.');
-      } else {
-        setMessage(res.data?.message || 'OTP verified.');
-        setOtpVerified(true);
-      }
-    } catch (err) {
+      setMessage(res.data?.message || 'OTP verified.');
+      setOtpVerified(true);
+    } catch {
       setMessage('Server error. Please try again later.');
     }
   };
@@ -54,13 +46,8 @@ const ForgotPassword = () => {
   const handleResendOtp = async () => {
     try {
       const res = await requestPasswordReset({ email });
-      if (res.error?.status === 400) {
-        setMessage(res.error?.data?.message || 'Invalid email address.');
-      } else {
-        setMessage(res.data?.message || 'OTP resent successfully.');
-        setResendEnabled(false);
-      }
-    } catch (err) {
+      setMessage(res.data?.message || 'OTP resent successfully.');
+    } catch {
       setMessage('Server error. Please try again later.');
     }
   };
@@ -72,16 +59,11 @@ const ForgotPassword = () => {
       return;
     }
     try {
-      const res = await resetPassword({ email, newPassword,confirmPassword });
-      if (res.error?.status === 400) {
-        setMessage(res.error?.data?.message || 'Invalid request.');
-      } else {
-        console.log(res)
-        setMessage(res.data?.message || 'Password reset successfully.');
-        alert('Password reset successfully. Please sign in again.');
-        navigate('/signIn');
-      }
-    } catch (err) {
+      const res = await resetPassword({ email, newPassword, confirmPassword });
+      setMessage(res.data?.message || 'Password reset successfully.');
+      alert('Password reset successfully. Please sign in again.');
+      navigate('/signIn');
+    } catch {
       setMessage('Server error. Please try again later.');
     }
   };
@@ -113,14 +95,7 @@ const ForgotPassword = () => {
               onChange={(otp) => setOtp(otp)}
               numInputs={4}
               renderInput={(props) => <input {...props} />}
-              inputStyle={{
-                width: '2.5rem',
-                height: '2.5rem',
-                margin: '0 0.25rem',
-                fontSize: '1.5rem',
-                borderRadius: 4,
-                border: '1px solid rgba(0,0,0,0.3)',
-              }}
+              inputStyle="w-10 h-10 mx-1 text-xl rounded border border-gray-300"
               isInputNum
             />
             <div className="flex mt-4 gap-2">
@@ -158,7 +133,7 @@ const ForgotPassword = () => {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute inset-y-0 right-3 flex items-center"
               >
-                {showPassword ? <VisibilityOff /> : <Visibility />}
+                {showPassword ? <EyeOff /> : <Eye />}
               </button>
             </div>
             <div className="mb-4 relative">
@@ -174,7 +149,7 @@ const ForgotPassword = () => {
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute inset-y-0 right-3 flex items-center"
               >
-                {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                {showConfirmPassword ? <EyeOff /> : <Eye />}
               </button>
             </div>
             <button

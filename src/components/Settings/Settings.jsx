@@ -133,7 +133,7 @@ export default function UpdateProfile({ onClose }) {
                 />
                 {profile.logo && (
                   <img src={profile.logo} alt="Restaurant Logo" className="mt-2 w-16 h-16 object-cover rounded-lg shadow-md" />
-                )}
+                )} 
               </div>
               <div className="flex flex-col">
                 <label className="flex items-center text-sm font-medium text-gray-700 mb-1">

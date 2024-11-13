@@ -60,6 +60,14 @@ export const AuthApi = createApi({
         mode:"cors"
       })
     }),
+    verifyToken: build.mutation({
+      query: (token) => ({
+        url: `verifytoken`,
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        mode:"cors"
+      })
+    }),
     
   }),
 })
@@ -72,8 +80,9 @@ export const {
   useRequestPasswordResetMutation,
   useVerifyPasswordResetMutation,
   usePasswordResetMutation,
-  useUpdateProfileMutation
-
+  useUpdateProfileMutation,
+  useVerifyTokenMutation,
+  
 } = AuthApi
 
 

@@ -1,13 +1,13 @@
-import { useState } from 'react'
+import { useState,useContext } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Home, Clipboard, Menu as MenuIcon, Settings, LogOut, X, ChevronDown, ChevronRight } from 'lucide-react'
-
+import {context} from "../App"
 export default function Sidebar() {
   const location = useLocation()
   const [isOpen, setIsOpen] = useState(false)  // Mobile sidebar toggle
   const [expandedMenu, setExpandedMenu] = useState(null)  // Toggle for nested items
-
-  const handleLogout = () => console.log("logout")
+  const {token, setToken } = useContext(context)
+ 
 
   const toggleSidebar = () => setIsOpen(!isOpen)
 
@@ -28,6 +28,12 @@ export default function Sidebar() {
     },
     { name: 'Settings', icon: Settings, path: '/settings' },
   ]
+
+
+  const handleLogout=()=>{
+    localStorage.removeItem('token');
+    setToken(null);
+  }
 
   return (
     <>
@@ -91,7 +97,7 @@ export default function Sidebar() {
             onClick={handleLogout}
             className="flex items-center w-full px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded"
           >
-            <LogOut className="w-5 h-5 mr-3" />
+          <LogOut className="w-5 h-5 mr-3"  />
             Logout
           </button>
         </div>

@@ -1,6 +1,6 @@
 import React, { useState,useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, UserPlus, ArrowRightCircle, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, UserPlus, ArrowRightCircle, Eye, EyeOff, Stethoscope } from 'lucide-react';
 import { useSignInMutation } from '../../App/Services/AuthenticationApi';
 import { context } from '../../App';
 
@@ -59,8 +59,10 @@ const SignIn = () => {
               setError('Unexpected error occurred. Please try again.');
           }
         } else {
-          setUser(response.data.user);
-          setToken(response.data.token);
+          const { user, token } = response.data;
+          setUser(user);
+          localStorage.setItem('token', token); // store the token in localStorage with 'token' as the key
+          setToken(token)
         }
       })
       .catch(() => {

@@ -13,9 +13,41 @@ export const MenuApi = createApi({
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         mode:"cors"
       }),
+      
 
+    }),
+
+    getMenuItems: build.mutation({
+      query: ({ token }) => ({
+        url: `/getAllMenuItems`,
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        mode:"cors"
+      }),
+    
+    }),
+    deleteItem: build.mutation({
+      query: ({ id,token }) => ({
+        url: `/deleteItem`,
+        method: 'POST',
+        body:{id},
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        mode:"cors"
+      })
+    
+    }),
+
+    toggleItem: build.mutation({
+      query: ({ id,token }) => ({
+        url: `/toggleItem`,
+        method: 'POST',
+        body:{id},
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        mode:"cors"
+      })
+    
     }),
   }),
 })
 
-export const { useAddItemMutation } = MenuApi
+export const { useAddItemMutation,useGetMenuItemsMutation,useDeleteItemMutation,useToggleItemMutation } = MenuApi
