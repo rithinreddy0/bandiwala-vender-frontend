@@ -22,12 +22,13 @@ export default function App() {
   useEffect(async ()=>{
     const response =await verifyToken(localStorage.getItem('token'))
     console.log(response)
-    if(!response.data.status==200){
+    if(!response.ok){
       localStorage.removeItem('token');
     }
-
       
   },[])
+
+   
   if (loading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>
   }

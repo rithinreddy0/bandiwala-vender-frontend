@@ -1,136 +1,102 @@
-import { useState, useEffect } from 'react'
+// src/components/VendorOrders.jsx
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useGetOrdersMutation, useUpdateOrderStatusMutation } from '../App/Services/OrdersApi';
+import io from 'socket.io-client';
 
-// type Order = {
-//   id: string
-//   customerName: string
-//   address: string
-//   phoneNumber: string
-//   items: { name: string; quantity: number; price: number }[]
-//   total: number
-//   status: 'Pending' | 'Accepted' | 'Preparing' | 'Out for Delivery' | 'Delivered'
-// }
+const socket = io('https://bandiwala-backend.onrender.com'); // Replace with your backend URL
 
-export default function Orders() {
-  const [orders, setOrders] = useState([])
-  const [loading, setLoading] = useState(true)
+const VendorOrders = () => {
+  const [getOrders, { data: orders, error, isLoading }] = useGetOrdersMutation();
+  const [updateOrderStatus] = useUpdateOrderStatusMutation();
+  const [statusError, setStatusError] = useState(null);
+  const token = localStorage.getItem('token'); // Assuming the token is stored in localStorage
 
   useEffect(() => {
-    fetchOrders()
-  }, [])
-
-  const fetchOrders = async () => {
-    setLoading(true)
-    try {
-      // Replace with actual API call
-      const response = await fetch('/api/orders')
-      const data = await response.json()
-      setOrders(data)
-    } catch (error) {
-      console.error('Error fetching orders:', error)
-    } finally {
-      setLoading(false)
+    // Fetch orders when the component mounts
+    if (token) {
+      getOrders({token});
     }
-  }
 
-  const updateOrderStatus = async (orderId ) => {
-    try {
-      // Replace with actual API call
-      await fetch(`/api/orders/${orderId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
-      })
+    // Listen for real-time updates on order status change
+    socket.on('orderStatusUpdated', (updatedOrder) => {
+      // Update local state with the updated order
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
-          order.id === orderId ? { ...order, status: newStatus } : order
+          order._id === updatedOrder._id ? updatedOrder : order
         )
-      )
-    } catch (error) {
-      console.error('Error updating order status:', error)
-    }
+      );
+    });
+
+    // Cleanup the socket listener when the component is unmounted
+    return () => {
+      socket.off('orderStatusUpdated');
+    };
+  }, [getOrders, token]);
+
+  const handleStatusChange = (orderId, status) => {
+    updateOrderStatus({ orderId, status, token })
+      .then((response) => {
+        if (response.error) {
+          setStatusError(response.error.message);
+        } else {
+          // Emit real-time update through socket after successful status update
+          socket.emit('orderStatusUpdated', { orderId, status });
+        }
+      })
+      .catch((err) => {
+        setStatusError('Failed to update order status');
+      });
+  };
+
+  if (isLoading) {
+    return <p>Loading orders...</p>;
   }
 
-  if (loading) {
-    return <div className="p-6">Loading orders...</div>
+  if (error) {
+    return <p>Error: {error.message}</p>;
   }
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Orders</h1>
-      <div className="grid gap-6">
-        {orders.map((order) => (
-          <div key={order.id} className="bg-white p-6 rounded-lg shadow">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h2 className="text-xl font-semibold">Order #{order.id}</h2>
-                <p className="text-gray-600">{order.customerName}</p>
-                <p className="text-gray-600">{order.address}</p>
-                <p className="text-gray-600">{order.phoneNumber}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-lg font-semibold">${order.total.toFixed(2)}</p>
-                <p className={`text-sm font-medium ${
-                  order.status === 'Delivered' ? 'text-green-600' : 'text-yellow-600'
-                }`}>
-                  {order.status}
-                </p>
-              </div>
-            </div>
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold mb-2">Items:</h3>
-              <ul className="list-disc list-inside">
-                {order.items.map((item, index) => (
-                  <li key={index}>
-                    {item.name} x{item.quantity} - ${(item.price * item.quantity).toFixed(2)}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="flex justify-end space-x-2">
-              {order.status === 'Pending' && (
-                <>
-                  <button
-                    onClick={() => updateOrderStatus(order.id, 'Accepted')}
-                    className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                  >
-                    Accept
-                  </button>
-                  <button
-                    onClick={() => updateOrderStatus(order.id, 'Rejected')}
-                    className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-                  >
-                    Reject
-                  </button>
-                </>
-              )}
-              {order.status === 'Accepted' && (
+    <div className="p-4">
+      <h1 className="text-2xl font-bold">Vendor Orders</h1>
+      {statusError && <p className="text-red-500">{statusError}</p>}
+      <div className="mt-4 space-y-4">
+        {orders?.map((order) => (
+          <div key={order._id} className="border p-4 rounded-lg shadow-lg bg-white">
+            <h2 className="text-lg font-semibold">Order ID: {order._id}</h2>
+            <p>User: {order.userId?.name}</p>
+            <p>Total Amount: ₹{order.totalAmount}</p>
+            <p>Status: {order.status}</p>
+            <div className="mt-2 flex space-x-2">
+              {order.status !== 'Delivered' && (
                 <button
-                  onClick={() => updateOrderStatus(order.id, 'Preparing')}
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  onClick={() => handleStatusChange(order._id, 'Preparing')}
+                  className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-700"
                 >
-                  Start Preparing
+                  Preparing
                 </button>
               )}
-              {order.status === 'Preparing' && (
+              {order.status !== 'Delivered' && (
                 <button
-                  onClick={() => updateOrderStatus(order.id, 'Out for Delivery')}
-                  className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                  onClick={() => handleStatusChange(order._id, 'Delivered')}
+                  className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-700"
                 >
-                  Out for Delivery
+                  Delivered
                 </button>
               )}
-              {order.status === 'Out for Delivery' && (
-                <button
-                  onClick={() => updateOrderStatus(order.id, 'Delivered')}
-                  className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                >
-                  Mark as Delivered
-                </button>
-              )}
+              <button
+                onClick={() => handleStatusChange(order._id, 'Cancelled')}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-700"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
+
+export default VendorOrders;
