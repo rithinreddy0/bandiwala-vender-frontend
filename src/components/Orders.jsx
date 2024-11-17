@@ -28,17 +28,21 @@ const VendorOrders = () => {
         if (response.error) {
           setStatusError(response.error.message);
         } else {
-          // Update the local state after successfully changing the status
-          setVendorOrders((prevOrders) =>
-            prevOrders.map((order) =>
-              order._id === orderId ? { ...order, status } : order
-            )
-          );
+          // Refetch orders after status change
+          getOrders({ token }).then((response) => {
+            if (response.data) {
+              setVendorOrders(response.data.orders);
+            }
+          });
         }
       })
       .catch(() => {
         setStatusError('Failed to update order status.');
       });
+  };
+
+  const handleAcceptOrder = (orderId) => {
+    handleStatusChange(orderId, 'Accepted');
   };
 
   if (isLoading) {
@@ -76,28 +80,36 @@ const VendorOrders = () => {
               </ul>
               <p>Order Date: {new Date(order.createdAt).toLocaleDateString()}</p>
               <div className="mt-2 flex space-x-2">
-                {order.status !== 'Delivered' && (
+                {order.status !== 'Accepted' && (
                   <button
-                    onClick={() => handleStatusChange(order._id, 'Preparing')}
-                    className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-700"
+                    onClick={() => handleAcceptOrder(order._id)}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700"
                   >
-                    Preparing
+                    Accept
                   </button>
                 )}
-                {order.status !== 'Delivered' && (
-                  <button
-                    onClick={() => handleStatusChange(order._id, 'Delivered')}
-                    className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-700"
-                  >
-                    Delivered
-                  </button>
+                {order.status === 'Accepted' && (
+                  <>
+                    <button
+                      onClick={() => handleStatusChange(order._id, 'Preparing')}
+                      className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-700"
+                    >
+                      Preparing
+                    </button>
+                    <button
+                      onClick={() => handleStatusChange(order._id, 'Delivered')}
+                      className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-700"
+                    >
+                      Delivered
+                    </button>
+                    <button
+                      onClick={() => handleStatusChange(order._id, 'Cancelled')}
+                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-700"
+                    >
+                      Cancel
+                    </button>
+                  </>
                 )}
-                <button
-                  onClick={() => handleStatusChange(order._id, 'Cancelled')}
-                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-700"
-                >
-                  Cancel
-                </button>
               </div>
             </div>
           ))}
