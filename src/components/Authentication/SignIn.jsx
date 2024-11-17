@@ -63,6 +63,7 @@ const SignIn = () => {
           setUser(user);
           localStorage.setItem('token', token); // store the token in localStorage with 'token' as the key
           setToken(token)
+          
         }
       })
       .catch(() => {

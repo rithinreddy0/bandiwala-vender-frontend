@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom'
 import { useState, useEffect,createContext } from 'react'
-import Dashboard from './components/Dashboard'
 import Orders from './components/Orders'
 import Settings from './components/Settings/Settings'
 import Sidebar from './components/Sidebar'
@@ -47,16 +46,15 @@ export default function App() {
         {/* Main Content */}
         <div className={`flex-1 overflow-auto ${token ? 'lg:ml-64' : ''}`}>
           <Routes>
-            <Route path="/signIn" element={token ? <Navigate to="/dashboard" /> : <SignIn />} />
-            <Route path="/signUp" element={token ? <Navigate to="/dashboard" /> : <SignUp />} />
-            <Route path="/otp/:email" element={token ? <Navigate to="/dashboard" /> : <Otp />} />
-            <Route path="/forgot-password/:email" element={token ? <Navigate to="/dashboard" /> : <ForgotPassword />} />
-            <Route path="/dashboard" element={token ? <Dashboard /> : <Navigate to="/signIn" />} />
+            <Route path="/signIn" element={token ? <Navigate to="/orders" /> : <SignIn />} />
+            <Route path="/signUp" element={token ? <Navigate to="/orders" /> : <SignUp />} />
+            <Route path="/otp/:email" element={token ? <Navigate to="/orders" /> : <Otp />} />
+            <Route path="/forgot-password/:email" element={token ? <Navigate to="/orders" /> : <ForgotPassword />} />
             <Route path="/orders" element={token ? <Orders /> : <Navigate to="/signIn" />} />
             <Route path="/add-items" element={token ? <AddItem /> : <Navigate to="/signIn" />} />
             <Route path="/menu-items" element={token ? <MenuItems /> : <Navigate to="/signIn" />} />
             <Route path="/settings" element={token ? <Settings /> : <Navigate to="/signIn" />} />
-            <Route path="/" element={<Navigate to="/dashboard" />} />
+            <Route path="/" element={<Navigate to="/orders" />} />
           </Routes>
         </div>
       </div>

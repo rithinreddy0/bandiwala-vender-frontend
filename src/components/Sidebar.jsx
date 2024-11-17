@@ -16,7 +16,6 @@ export default function Sidebar() {
   }
 
   const navItems = [
-    { name: 'Dashboard', icon: Home, path: '/dashboard' },
     { name: 'Orders', icon: Clipboard, path: '/orders' },
     { 
       name: 'Menu', 
