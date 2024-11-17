@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 export const MenuApi = createApi({
   reducerPath: 'Menu',
-  baseQuery: fetchBaseQuery({ baseUrl: 'https://bandiwala-backend.onrender.com/api/vendor/' }),
+  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:4000/api/vendor/' }),
   endpoints: (build) => ({
     addItem: build.mutation({
 

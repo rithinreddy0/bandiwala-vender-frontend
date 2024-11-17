@@ -20,8 +20,8 @@ export default function App() {
   const [verifyToken]=useVerifyTokenMutation();
   useEffect(async ()=>{
     const response =await verifyToken(localStorage.getItem('token'))
-    console.log(response)
-    if(!response.ok){
+    // console.log(response.error.status==500)
+    if(response?.error?.status==500){
       localStorage.removeItem('token');
     }
       

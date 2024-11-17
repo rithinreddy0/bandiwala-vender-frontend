@@ -42,7 +42,7 @@ const VendorOrders = () => {
   };
 
   const handleAcceptOrder = (orderId) => {
-    handleStatusChange(orderId, 'Accepted');
+    handleStatusChange(orderId, 'Accepted');  // Change to 'Accepted' when the order is accepted
   };
 
   if (isLoading) {
@@ -69,6 +69,7 @@ const VendorOrders = () => {
               <p>Status: {order.status}</p>
               <p>Delivery Address: {order.deliveryAddress || 'No address provided'}</p>
               <p>Mobile No: {order.mobileNo || 'No mobile number provided'}</p>
+              <p>Order Created: {new Date(order.createdAt).toLocaleString()}</p>
               <p>Items:</p>
               <ul className="list-disc list-inside">
                 {order.menuItems?.map((item, index) => (
@@ -78,16 +79,20 @@ const VendorOrders = () => {
                   </li>
                 )) || <li>No items available</li>}
               </ul>
-              <p>Order Date: {new Date(order.createdAt).toLocaleDateString()}</p>
               <div className="mt-2 flex space-x-2">
-                {order.status !== 'Accepted' && (
-                  <button
-                    onClick={() => handleAcceptOrder(order._id)}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700"
-                  >
-                    Accept
-                  </button>
+                {order.status === 'Order Placed' && (
+                  <>
+                    <button
+                      onClick={() => handleAcceptOrder(order._id)}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700"
+                    >
+                      Accept
+                    </button>
+                  
+                  </>
                 )}
+
+                {/* After accepting, show Preparing and On the Way buttons */}
                 {order.status === 'Accepted' && (
                   <>
                     <button
@@ -96,20 +101,38 @@ const VendorOrders = () => {
                     >
                       Preparing
                     </button>
+                  </>
+                )}
+
+                {/* When status is Preparing, show On the Way button */}
+                {order.status === 'Preparing' && (
+                  <>
+                    <button
+                      onClick={() => handleStatusChange(order._id, 'On the Way')}
+                      className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-700"
+                    >
+                      On the Way
+                    </button>
+                  </>
+                )}
+
+                {/* When status is On the Way, show Delivered button */}
+                {order.status === 'On the Way' && (
+                  <>
                     <button
                       onClick={() => handleStatusChange(order._id, 'Delivered')}
                       className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-700"
                     >
                       Delivered
                     </button>
-                    <button
+                  </>
+                )}
+                <button
                       onClick={() => handleStatusChange(order._id, 'Cancelled')}
                       className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-700"
                     >
                       Cancel
                     </button>
-                  </>
-                )}
               </div>
             </div>
           ))}

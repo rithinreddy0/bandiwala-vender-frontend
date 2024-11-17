@@ -46,7 +46,7 @@ export default function UpdateProfile() {
   const handleProfileUpdate = async (e) => {
     e.preventDefault()
     console.log(profile)
-    await updateProfile({ ...profile, token }).then((response) => {
+    await updateProfile({data:{ ...profile}, token }).then((response) => {
       console.log(response)
       setIsEditing(false)  // Disable editing after updating
     })

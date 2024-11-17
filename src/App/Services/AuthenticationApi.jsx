@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 export const AuthApi = createApi({
   reducerPath: 'Auth',  
-  baseQuery: fetchBaseQuery({ baseUrl: 'https://bandiwala-backend.onrender.com/api/vendor/' }),
+  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:4000/api/vendor/' }),
   endpoints: (build) => ({
     signUp: build.mutation({
       query: (body) => ({
@@ -52,10 +52,10 @@ export const AuthApi = createApi({
       })
     }),
     updateProfile: build.mutation({
-      query: ({formData,token}) => ({
+      query: ({data,token}) => ({
         url: `update`,
         method: 'POST',
-        body:formData,
+        body:data,
         headers: { 'Authorization': `Bearer ${token}` },
         mode:"cors"
       })
