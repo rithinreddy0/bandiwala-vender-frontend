@@ -1,9 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useGetOrdersMutation, useUpdateOrderStatusMutation } from '../App/Services/OrdersApi';
 import { context } from '../App';
-import io from 'socket.io-client';
-
-const socket = io('https://bandiwala-backend.onrender.com'); // Replace with your backend URL
 
 const VendorOrders = () => {
   const [getOrders, { data: orders, error, isLoading }] = useGetOrdersMutation();
@@ -24,32 +21,6 @@ const VendorOrders = () => {
     }
   }, [getOrders, token]);
 
-  useEffect(() => {
-    // Join vendor room once user is loaded
-    if (user?._id) {
-      socket.emit('joinVendorRoom', user._id);
-    }
-
-    // Real-time order listener
-    socket.on('newOrder', (newOrder) => {
-      setVendorOrders((prevOrders) => [newOrder.order, ...prevOrders]);
-    });
-
-    socket.on('orderStatusUpdated', (updatedOrder) => {
-      setVendorOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order._id === updatedOrder._id ? updatedOrder : order
-        )
-      );
-    });
-
-    // Cleanup socket listeners
-    return () => {
-      socket.off('newOrder');
-      socket.off('orderStatusUpdated');
-    };
-  }, [user]);
-
   const handleStatusChange = (orderId, status) => {
     if (!token) return;
     updateOrderStatus({ orderId, status, token })
@@ -57,8 +28,12 @@ const VendorOrders = () => {
         if (response.error) {
           setStatusError(response.error.message);
         } else {
-          // Emit real-time update through socket
-          socket.emit('orderStatusUpdated', { orderId, status });
+          // Update the local state after successfully changing the status
+          setVendorOrders((prevOrders) =>
+            prevOrders.map((order) =>
+              order._id === orderId ? { ...order, status } : order
+            )
+          );
         }
       })
       .catch(() => {
@@ -88,6 +63,18 @@ const VendorOrders = () => {
               <p>User: {order.userId?.name || 'Unknown'}</p>
               <p>Total Amount: ₹{order.totalAmount}</p>
               <p>Status: {order.status}</p>
+              <p>Delivery Address: {order.deliveryAddress || 'No address provided'}</p>
+              <p>Mobile No: {order.mobileNo || 'No mobile number provided'}</p>
+              <p>Items:</p>
+              <ul className="list-disc list-inside">
+                {order.menuItems?.map((item, index) => (
+                  <li key={index}>
+                    {item.menuItem?.name || 'Unknown Item'} - Qty: {item.quantity} - ₹
+                    {item.menuItem?.price || 'N/A'}
+                  </li>
+                )) || <li>No items available</li>}
+              </ul>
+              <p>Order Date: {new Date(order.createdAt).toLocaleDateString()}</p>
               <div className="mt-2 flex space-x-2">
                 {order.status !== 'Delivered' && (
                   <button
