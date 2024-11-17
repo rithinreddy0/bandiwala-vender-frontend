@@ -4,7 +4,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 export const OrdersApi = createApi({
   reducerPath: 'ordersApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: 'http://localhost:4000/api/vendor/', // Adjust to your backend URL
+    baseUrl: 'https://bandiwala-backend.onrender.com/api/vendor/', // Adjust to your backend URL
   }),
   endpoints: (builder) => ({
     // Mutation to fetch all orders for the vendor
